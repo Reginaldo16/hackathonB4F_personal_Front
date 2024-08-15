@@ -1,4 +1,4 @@
-import React from "react";
+
 import Header from "../../components/header.js/Header";
 import Appointment from "../Appointment/Appointment";
 import Footer from "../../components/Footer/Footer";

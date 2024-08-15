@@ -1,4 +1,4 @@
-import React from "react";
+
 import Header from "../../components/header.js/Header";
 import Footer from "../../components/Footer/Footer";
 import ProfileCard from "../../components/profile/profile";

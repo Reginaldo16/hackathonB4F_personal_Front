@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+import { useState } from "react";
 import Footer from "../Footer/Footer";
 import Header from "../header.js/Header";
+
 
 const AppointmentForm = ({ closeModal }) => {
   const [formData, setFormData] = useState({
@@ -13,16 +15,92 @@ const AppointmentForm = ({ closeModal }) => {
     time: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
     });
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+  validateField(name, value);
+  };
+
+  const validateField = (name, value) => {
+    let newError = "";
+    
+    switch (name) {
+      case "name":
+        if (!value.trim()) newError = "Nome é obrigatório.";
+        break;
+      case "email":
+        if (!value.trim()) {
+          newError = "Email é obrigatório.";
+        } else if (!/\S+@\S+\.\S+/.test(value)) {
+          newError = "Email inválido.";
+        }
+        break;
+      case "contact":
+        if (!value.trim()) {
+          newError = "Telefone é obrigatório.";
+        } else if (!/^\d{10,15}$/.test(value)) {
+          newError = "Telefone inválido. Deve ter entre 10 e 15 dígitos.";
+        }
+        break;
+      case "date":
+        if (!value.trim()) newError = "Data é obrigatória.";
+        break;
+      case "sex":
+        if (!value) newError = "Sexo é obrigatório.";
+        break;
+      case "workout":
+        if (!value.trim()) newError = "Descrição do treino é obrigatória.";
+        break;
+      case "time":
+        if (!value.trim()) newError = "Hora é obrigatória.";
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: newError,
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "Nome é obrigatório.";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email é obrigatório.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email inválido.";
+    }
+    if (!formData.contact.trim()) {
+      newErrors.contact = "Telefone é obrigatório.";
+    } else if (!/^\d{10,15}$/.test(formData.contact)) {
+      newErrors.contact = "Telefone inválido. Deve ter entre 10 e 15 dígitos.";
+    }
+    if (!formData.date.trim()) newErrors.date = "Data é obrigatória.";
+    if (!formData.sex) newErrors.sex = "Sexo é obrigatório.";
+    if (!formData.workout.trim()) newErrors.workout = "Descrição do treino é obrigatória.";
+    if (!formData.time.trim()) newErrors.time = "Hora é obrigatória.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     try {
       const response = await fetch("http://localhost:3036/api/appointment/", {
@@ -34,7 +112,7 @@ const AppointmentForm = ({ closeModal }) => {
       });
 
       if (response.ok) {
-        console.log("Form submitted successfully");
+        console.log("Formulário enviado com sucesso");
 
         setFormData({
           name: "",
@@ -46,10 +124,10 @@ const AppointmentForm = ({ closeModal }) => {
           time: "",
         });
       } else {
-        console.error("Error submitting form");
+        console.error("Erro ao enviar o formulário");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Erro ao enviar o formulário:", error);
     }
   };
 
@@ -83,7 +161,7 @@ const AppointmentForm = ({ closeModal }) => {
 
   return (
     <>
-    <Header />
+      <Header />
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm max-w-2xl mx-auto my-3 bg-slate-50">
         <div className="flex flex-col space-y-1.5 p-6">
           <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">
@@ -103,7 +181,9 @@ const AppointmentForm = ({ closeModal }) => {
                 Nome
               </label>
               <input
-                className="flex h-10 w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`flex h-10 w-full rounded-md border ${
+                  errors.name ? "border-red-500" : "border-input"
+                } bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
                 id="name"
                 name="name"
                 placeholder="Enter your name"
@@ -111,6 +191,7 @@ const AppointmentForm = ({ closeModal }) => {
                 onChange={handleChange}
                 required
               />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
             </div>
             <div className="space-y-2">
               <label
@@ -120,7 +201,9 @@ const AppointmentForm = ({ closeModal }) => {
                 Email
               </label>
               <input
-                className="flex h-10 w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`flex h-10 w-full rounded-md border ${
+                  errors.email ? "border-red-500" : "border-input"
+                } bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
                 id="email"
                 name="email"
                 placeholder="Enter your email"
@@ -129,6 +212,7 @@ const AppointmentForm = ({ closeModal }) => {
                 onChange={handleChange}
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -140,7 +224,9 @@ const AppointmentForm = ({ closeModal }) => {
                 Telefone
               </label>
               <input
-                className="flex h-10 w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`flex h-10 w-full rounded-md border ${
+                  errors.contact ? "border-red-500" : "border-input"
+                } bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
                 id="contact"
                 name="contact"
                 placeholder="Enter your phone number"
@@ -149,6 +235,7 @@ const AppointmentForm = ({ closeModal }) => {
                 onChange={handleChange}
                 required
               />
+              {errors.contact && <p className="text-red-500 text-sm">{errors.contact}</p>}
             </div>
             <div className="space-y-2">
               <label
@@ -158,7 +245,9 @@ const AppointmentForm = ({ closeModal }) => {
                 Data
               </label>
               <input
-                className="flex h-10 w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`flex h-10 w-full rounded-md border ${
+                  errors.date ? "border-red-500" : "border-input"
+                } bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
                 id="date"
                 name="date"
                 placeholder="Select date"
@@ -167,6 +256,7 @@ const AppointmentForm = ({ closeModal }) => {
                 onChange={handleChange}
                 required
               />
+              {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
             </div>
           </div>
           <div className="space-y-2">
@@ -174,7 +264,9 @@ const AppointmentForm = ({ closeModal }) => {
               Sexo
             </label>
             <select
-              className="flex h-10 w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className={`flex h-10 w-full rounded-md border ${
+                errors.sex ? "border-red-500" : "border-input"
+              } bg-slate-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
               id="sex"
               name="sex"
               value={formData.sex}
@@ -186,6 +278,7 @@ const AppointmentForm = ({ closeModal }) => {
               <option value="Feminino">Feminino</option>
               <option value="Outro">Outro</option>
             </select>
+            {errors.sex && <p className="text-red-500 text-sm">{errors.sex}</p>}
           </div>
 
           <div className="space-y-2">
@@ -196,7 +289,9 @@ const AppointmentForm = ({ closeModal }) => {
               Objectivo do treino
             </label>
             <textarea
-              className="flex w-full rounded-md border border-input bg-slate-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[100px]"
+              className={`flex w-full rounded-md border ${
+                errors.workout ? "border-red-500" : "border-input"
+              } bg-slate-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[100px]`}
               id="workout"
               name="workout"
               placeholder="Describe your fitness goals"
@@ -204,6 +299,7 @@ const AppointmentForm = ({ closeModal }) => {
               onChange={handleChange}
               required
             ></textarea>
+            {errors.workout && <p className="text-red-500 text-sm">{errors.workout}</p>}
           </div>
 
           <div className="space-y-2">
@@ -269,6 +365,7 @@ const AppointmentForm = ({ closeModal }) => {
                 </div>
               </div>
             </div>
+            {errors.time && <p className="text-red-500 text-sm">{errors.time}</p>}
           </div>
 
           <button
