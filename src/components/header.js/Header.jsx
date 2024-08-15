@@ -10,7 +10,7 @@ function Header() {
   };
 
   return (
-    <header className="container mx-auto px-4 lg:px-6 h-14 flex items-center shadow-sm">
+    <header className="container mx-auto px-4 lg:px-6 h-14 flex items-center shadow-black border-b border-black">
       <Link to="/home" className="flex items-center text-2xl font-bold">
         Fitness Gulera
       </Link>
